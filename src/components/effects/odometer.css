@@ -1,0 +1,73 @@
+/* Odometer — adapted from MRR Counter with linear(), Oracle palette */
+:root {
+  --odometer-ease:
+    linear( 0, 0.0009 8.51%, -0.0047 19.22%, 0.0016 22.39%, 0.023 27.81%,
+       0.0237 30.08%, 0.0144 31.81%, -0.0051 33.48%, -0.1116 39.25%, -0.1181 40.59%,
+       -0.1058 41.79%, -0.0455, 0.0701 45.34%, 0.9702 55.19%, 1.0696 56.97%,
+       1.0987 57.88%, 1.1146 58.82%, 1.1181 59.83%, 1.1092 60.95%, 1.0057 66.48%,
+       0.986 68.14%, 0.9765 69.84%, 0.9769 72.16%, 0.9984 77.61%, 1.0047 80.79%,
+       0.9991 91.48%, 1 );
+}
+
+.odometer-counter {
+  display: inline-block;
+}
+
+.odometer-chars {
+  display: flex;
+  gap: 2px;
+  user-select: none;
+  pointer-events: none;
+}
+
+.odometer-char {
+  --mask-size: 0.2;
+  display: grid;
+  height: 1lh;
+  line-height: 1.4;
+  font-variant: tabular-nums;
+  overflow: hidden;
+  mask: linear-gradient(transparent, white calc(1lh * var(--mask-size)) calc(100% - (1lh * var(--mask-size))), transparent);
+}
+
+.odometer-char,
+.odometer-track span {
+  background: linear-gradient(var(--oracle-red) 0%, var(--oracle-red-dark) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.odometer-track {
+  display: grid;
+  translate: 0 calc((var(--v) + 1) * (-1lh));
+  transition: translate 2s var(--odometer-ease);
+}
+
+.odometer-track span {
+  height: 1lh;
+  font-weight: 800;
+}
+
+.odometer-symbol {
+  background: linear-gradient(var(--oracle-red) 0%, var(--oracle-red-dark) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 800;
+  height: 1lh;
+  display: flex;
+  align-items: center;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

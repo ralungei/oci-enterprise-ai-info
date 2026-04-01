@@ -1,0 +1,213 @@
+/* Galaxy Button — adapted from CSS Galaxy Button, Oracle Red palette */
+.galaxy-button-link {
+  text-decoration: none;
+  display: inline-block;
+}
+
+.galaxy-button-wrap {
+  --hue: 8;
+  --sat: 75%;
+  --transition: 0.25s;
+  --spark: 1.8s;
+  --cut: 0.1em;
+  --active: 0;
+  --bg:
+    radial-gradient(
+      120% 120% at 126% 126%,
+      hsl(var(--hue) calc(var(--active) * var(--sat)) 98% / calc(var(--active) * 0.9)) 40%,
+      transparent 50%
+    ) calc(100px - (var(--active) * 100px)) 0 / 100% 100% no-repeat,
+    radial-gradient(
+      120% 120% at 120% 120%,
+      hsl(var(--hue) calc(var(--active) * var(--sat)) 70% / calc(var(--active) * 1)) 30%,
+      transparent 70%
+    ) calc(100px - (var(--active) * 100px)) 0 / 100% 100% no-repeat,
+    hsl(var(--hue) calc(var(--active) * 100%) calc(12% - (var(--active) * 8%)));
+  background: var(--bg);
+  font-size: 1.15rem;
+  font-weight: 700;
+  border: 0;
+  cursor: pointer;
+  padding: 0.9em 1.8em;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  white-space: nowrap;
+  border-radius: 2rem;
+  position: relative;
+  box-shadow:
+    0 0 calc(var(--active) * 6em) calc(var(--active) * 3em) hsl(var(--hue) var(--sat) 61% / 0.5),
+    0 0.05em 0 0 hsl(var(--hue) calc(var(--active) * var(--sat)) calc((var(--active) * 50%) + 30%)) inset,
+    0 -0.05em 0 0 hsl(var(--hue) calc(var(--active) * var(--sat)) calc(var(--active) * 10%)) inset;
+  transition: box-shadow var(--transition), scale var(--transition), background var(--transition);
+  scale: calc(1 + (var(--active) * 0.1));
+  transform-style: preserve-3d;
+  perspective: 100vmin;
+  overflow: hidden;
+}
+
+.galaxy-button-wrap:active {
+  scale: 1;
+}
+
+.galaxy-button-wrap:is(:hover, :focus-visible) {
+  --active: 1;
+}
+
+.galaxy-button-wrap.secondary {
+  --bg:
+    radial-gradient(
+      120% 120% at 126% 126%,
+      hsl(var(--hue) calc(var(--active) * var(--sat)) 98% / calc(var(--active) * 0.6)) 40%,
+      transparent 50%
+    ) calc(100px - (var(--active) * 100px)) 0 / 100% 100% no-repeat,
+    transparent;
+  background: var(--bg);
+  border: 2px solid hsl(0 0% 100% / 0.15);
+}
+
+.galaxy-button-wrap.secondary:is(:hover, :focus-visible) {
+  border-color: hsl(0 0% 100% / 0.3);
+}
+
+/* Star particles */
+.galaxy-star {
+  height: calc(var(--size) * 1px);
+  aspect-ratio: 1;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  opacity: var(--alpha);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(10deg) rotate(0deg) translateY(calc(var(--distance) * 1px));
+  animation: galaxy-orbit calc(var(--duration) * 1s) calc(var(--delay) * -1s) infinite linear;
+}
+
+@keyframes galaxy-orbit {
+  to {
+    transform: translate(-50%, -50%) rotate(10deg) rotate(360deg) translateY(calc(var(--distance) * 1px));
+  }
+}
+
+.galaxy-ring-outer {
+  position: absolute;
+  width: 100%;
+  aspect-ratio: 1;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  overflow: hidden;
+  opacity: var(--active);
+  transition: opacity var(--transition);
+}
+
+.galaxy-ring {
+  height: 200%;
+  width: 200%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  transform: translate(-28%, -40%) rotateX(-24deg) rotateY(-30deg) rotateX(90deg);
+  transform-style: preserve-3d;
+}
+
+.galaxy-star-container {
+  position: absolute;
+  inset: 0;
+  opacity: var(--active);
+  transition: opacity var(--transition);
+  mask: radial-gradient(white, transparent);
+}
+
+.galaxy-star--static {
+  animation: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(0, 0);
+  max-height: 4px;
+  filter: brightness(4);
+  opacity: 0.9;
+  animation:
+    galaxy-move-x calc(var(--duration) * 0.1s) calc(var(--delay) * -0.1s) infinite linear,
+    galaxy-move-y calc(var(--duration) * 0.2s) calc(var(--delay) * -0.2s) infinite linear;
+}
+
+@keyframes galaxy-move-x {
+  0% { translate: -100px 0; }
+  100% { translate: 100px 0; }
+}
+
+@keyframes galaxy-move-y {
+  0% { transform: translate(0, -50px); }
+  100% { transform: translate(0, 50px); }
+}
+
+/* Spark effect */
+.galaxy-spark {
+  position: absolute;
+  inset: 0;
+  border-radius: 2rem;
+  rotate: 0deg;
+  overflow: hidden;
+  mask: linear-gradient(white, transparent 50%);
+  animation: galaxy-flip calc(var(--spark) * 2) infinite steps(2, end);
+}
+
+@keyframes galaxy-flip {
+  to { rotate: 360deg; }
+}
+
+.galaxy-spark::before {
+  content: "";
+  position: absolute;
+  width: 200%;
+  aspect-ratio: 1;
+  top: 0%;
+  left: 50%;
+  z-index: -1;
+  translate: -50% -15%;
+  rotate: 0;
+  transform: rotate(-90deg);
+  opacity: calc((var(--active)) + 0.4);
+  background: conic-gradient(from 0deg, transparent 0 340deg, white 360deg);
+  transition: opacity var(--transition);
+  animation: galaxy-rotate var(--spark) linear infinite both;
+}
+
+@keyframes galaxy-rotate {
+  to { transform: rotate(90deg); }
+}
+
+.galaxy-spark::after {
+  content: "";
+  position: absolute;
+  inset: var(--cut);
+  border-radius: 2rem;
+}
+
+/* Backdrop fills the button interior */
+.galaxy-backdrop {
+  position: absolute;
+  inset: var(--cut);
+  background: var(--bg);
+  border-radius: 2rem;
+  transition: background var(--transition);
+}
+
+/* Text */
+.galaxy-text {
+  translate: 2% -6%;
+  letter-spacing: 0.01ch;
+  color: hsl(0 0% calc(60% + (var(--active) * 26%)));
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.galaxy-button-wrap.primary .galaxy-text {
+  color: hsl(0 0% calc(80% + (var(--active) * 15%)));
+}

@@ -1,0 +1,43 @@
+/* Isometric Floating Layers — adapted for Oracle palette */
+.iso-layers {
+  width: 350px;
+  max-width: 100%;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.iso-layer {
+  transform: translateX(var(--offset-x)) translateY(var(--offset-y)) translateZ(var(--offset-z));
+  transition: transform 0.2s ease-out;
+  animation: iso-hover 4s infinite ease-in-out;
+}
+
+.iso-layer:nth-of-type(2) { animation-delay: 0.4s; }
+.iso-layer:nth-of-type(3) { animation-delay: 0.8s; }
+.iso-layer:nth-of-type(4) { animation-delay: 1.2s; }
+.iso-layer:nth-of-type(5) { animation-delay: 1.6s; }
+.iso-layer:nth-of-type(6) { animation-delay: 2.0s; }
+
+.iso-layers text {
+  font-weight: bold;
+  font-family: 'Oracle Sans', sans-serif;
+  transform: skew(-68deg, 22deg) translate(calc(49px * var(--size) / 100), calc(7px * var(--size) / 100)) scaleY(0.5);
+  fill: rgba(255, 255, 255, 0.85);
+}
+
+.iso-layers path:nth-child(2) {
+  fill: rgba(0, 0, 0, 0.3);
+}
+
+.iso-layers path:nth-child(3) {
+  fill: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes iso-hover {
+  0%, 100% {
+    transform: translateX(var(--offset-x)) translateY(var(--offset-y)) translateZ(var(--offset-z));
+  }
+  50% {
+    transform: translateX(var(--offset-x)) translateY(calc(var(--offset-y) + 4px)) translateZ(var(--offset-z));
+  }
+}

@@ -1,65 +1,121 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect } from "react";
+import dynamic from "next/dynamic";
+import { ActiveSectionProvider, useActiveSection } from "@/context/ActiveSectionContext";
+import SectionProgress from "@/components/presentation/SectionProgress";
+import Teleprompter from "@/components/presentation/Teleprompter";
+import SectionWrapper from "@/components/presentation/SectionWrapper";
+import Preloader from "@/components/effects/Preloader";
+import CustomCursor from "@/components/effects/CustomCursor";
+import { slides } from "@/data/slides";
+
+/* ── Lazy-load every section (code-split per section) ── */
+const HeroSection = dynamic(() => import("@/components/sections/HeroSection"), { ssr: false });
+const AgentIntroSection = dynamic(() => import("@/components/sections/AgentIntroSection"), { ssr: false });
+const ProblemSection = dynamic(() => import("@/components/sections/ProblemSection"), { ssr: false });
+const PlatformPillars = dynamic(() => import("@/components/sections/PlatformPillars"), { ssr: false });
+const ModelsShowcase = dynamic(() => import("@/components/sections/ModelsShowcase"), { ssr: false });
+const AgentToolsGrid = dynamic(() => import("@/components/sections/AgentToolsGrid"), { ssr: false });
+const MemorySection = dynamic(() => import("@/components/sections/MemorySection"), { ssr: false });
+const FrameworksSection = dynamic(() => import("@/components/sections/FrameworksSection"), { ssr: false });
+const DeploymentSection = dynamic(() => import("@/components/sections/DeploymentSection"), { ssr: false });
+const DataPrivacySection = dynamic(() => import("@/components/sections/DataPrivacySection"), { ssr: false });
+const ObservabilitySection = dynamic(() => import("@/components/sections/ObservabilitySection"), { ssr: false });
+const SecurityAuthSection = dynamic(() => import("@/components/sections/SecurityAuthSection"), { ssr: false });
+const UseCasesSection = dynamic(() => import("@/components/sections/UseCasesSection"), { ssr: false });
+const RegionsMap = dynamic(() => import("@/components/sections/RegionsMap"), { ssr: false });
+const GetStartedSection = dynamic(() => import("@/components/sections/GetStartedSection"), { ssr: false });
+
+const sectionComponents: Record<string, React.ComponentType<{ content: never }>> = {
+  hero: HeroSection as React.ComponentType<{ content: never }>,
+  "what-is-agent": AgentIntroSection as React.ComponentType<{ content: never }>,
+  challenge: ProblemSection as React.ComponentType<{ content: never }>,
+  platform: PlatformPillars as React.ComponentType<{ content: never }>,
+  models: ModelsShowcase as React.ComponentType<{ content: never }>,
+  tools: AgentToolsGrid as React.ComponentType<{ content: never }>,
+  memory: MemorySection as React.ComponentType<{ content: never }>,
+  build: FrameworksSection as React.ComponentType<{ content: never }>,
+  deploy: DeploymentSection as React.ComponentType<{ content: never }>,
+  "data-privacy": DataPrivacySection as React.ComponentType<{ content: never }>,
+  observability: ObservabilitySection as React.ComponentType<{ content: never }>,
+  "security-auth": SecurityAuthSection as React.ComponentType<{ content: never }>,
+  "use-cases": UseCasesSection as React.ComponentType<{ content: never }>,
+  regions: RegionsMap as React.ComponentType<{ content: never }>,
+  "get-started": GetStartedSection as React.ComponentType<{ content: never }>,
+};
+
+function KeyboardHandler() {
+  const { toggleTeleprompter } = useActiveSection();
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "t" || e.key === "T") {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+        toggleTeleprompter();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [toggleTeleprompter]);
+
+  return null;
+}
+
+function MainContent() {
+  const { teleprompterVisible } = useActiveSection();
+
+  return (
+    <main
+      className={`transition-all duration-500 ${
+        teleprompterVisible ? "md:mr-[380px]" : ""
+      }`}
+    >
+      {slides.map((slide) => {
+        const Component = sectionComponents[slide.id];
+        if (!Component) return null;
+        return (
+          <SectionWrapper key={slide.id} id={slide.id}>
+            <Component content={slide.content as never} />
+          </SectionWrapper>
+        );
+      })}
+
+      {/* Footer */}
+      <footer className="bg-[#0a0a0f] border-t border-white/[0.06] py-12">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-oracle-red flex items-center justify-center">
+              <span className="text-white font-bold text-sm">O</span>
+            </div>
+            <span className="text-white/30 text-base">
+              OCI Enterprise AI &middot; Oracle Cloud Infrastructure
+            </span>
+          </div>
+          <div className="flex items-center gap-8">
+            {["Documentation", "API Reference", "Support"].map((link) => (
+              <a key={link} href="#" className="text-sm text-white/30 hover:text-white/60 transition-colors font-medium">
+                {link}
+              </a>
+            ))}
+          </div>
+          <span className="text-sm text-white/20">&copy; 2026 Oracle</span>
+        </div>
+      </footer>
+    </main>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <ActiveSectionProvider>
+      <Preloader />
+      <CustomCursor />
+      <KeyboardHandler />
+      <SectionProgress />
+      <Teleprompter />
+      <MainContent />
+    </ActiveSectionProvider>
   );
 }

@@ -1,0 +1,160 @@
+/* ─── Container Query Auth Cards ─── */
+
+.cq-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.cq-card {
+  container-type: inline-size;
+  container-name: auth-card;
+}
+
+.cq-card-inner {
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 2rem;
+  height: 100%;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.cq-card-inner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--cq-accent, #C74634);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.cq-card-inner:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.cq-card-inner:hover::before {
+  opacity: 1;
+}
+
+.cq-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.cq-card-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--cq-accent, #C74634) 15%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cq-accent, #C74634);
+  flex-shrink: 0;
+}
+
+.cq-card-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--cq-accent, #C74634);
+  background: color-mix(in srgb, var(--cq-accent, #C74634) 10%, transparent);
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+}
+
+.cq-card-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 0.75rem;
+}
+
+.cq-card-desc {
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.6;
+}
+
+.cq-card-footer {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cq-card-languages {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-family: var(--font-mono, monospace);
+}
+
+/* Container query: when card is wide enough, switch to horizontal layout */
+@container auth-card (min-width: 420px) {
+  .cq-card-inner {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 0 1.5rem;
+    align-items: start;
+  }
+
+  .cq-card-header {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0;
+    padding-right: 1.5rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .cq-card-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .cq-card-badge {
+    writing-mode: horizontal-tb;
+    margin-top: 0.5rem;
+  }
+
+  .cq-card-title {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .cq-card-desc {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .cq-card-footer {
+    grid-column: 2;
+    grid-row: 3;
+  }
+}
+
+/* Container query: very wide — even more spacious */
+@container auth-card (min-width: 550px) {
+  .cq-card-inner {
+    padding: 2.5rem;
+  }
+
+  .cq-card-title {
+    font-size: 1.5rem;
+  }
+
+  .cq-card-desc {
+    font-size: 1rem;
+  }
+}

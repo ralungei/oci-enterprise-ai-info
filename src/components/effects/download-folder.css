@@ -1,0 +1,68 @@
+/* Download Folder — adapted to Oracle palette */
+.dl-wrapper {
+  --size: 80px;
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+}
+
+.dl-download {
+  --scale-folder: 1;
+  --scale-pages: 0.7;
+  --ratio-page-2-height: 0.5;
+  --ratio-page-2-offset: 0;
+  --opacity-page-2: 1;
+  width: var(--size);
+  height: var(--size);
+  cursor: pointer;
+  filter: drop-shadow(rgba(0, 0, 0, 0.09) 4px 8px 12px) drop-shadow(rgba(0, 0, 0, 0.06) 2px 4px 6px);
+  position: relative;
+}
+
+.dl-download,
+.dl-folder-back,
+.dl-page-1,
+.dl-page-2,
+.dl-folder-front {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.dl-folder-back {
+  width: var(--size);
+  height: var(--size);
+  transform-origin: 50% 100%;
+  transform: translate(-50%, -50%) scaleY(var(--scale-folder));
+}
+
+.dl-page-1 {
+  --ratio-page-1: 0.95;
+  width: calc(var(--size) * 0.55 * var(--ratio-page-1));
+  height: calc(var(--size) * 0.55 / var(--ratio-page-1));
+  border-radius: 6px;
+  background-color: #fde8e4;
+  filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.1));
+  transform-origin: 50% 90%;
+  transform: translate(-50%, -50%) translateY(calc((1 - var(--scale-pages)) * -65%)) scale(var(--scale-pages));
+}
+
+.dl-page-2 {
+  --ratio-page-2: 1.05;
+  width: calc(var(--size) * 0.65 * var(--ratio-page-2));
+  height: calc((var(--size) * 0.65 * var(--ratio-page-2-height)) / var(--ratio-page-2));
+  border-radius: 6px;
+  background-color: #fff;
+  opacity: var(--opacity-page-2);
+  filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.1));
+  transform: translate(-50%, -50%) translateY(17%) translateY(calc((1 - var(--scale-pages)) * -85%)) translateY(calc(var(--size) * -1.2 * var(--ratio-page-2-offset))) translateY(calc((1 - var(--ratio-page-2-height)) * -65%)) scale(var(--scale-pages));
+}
+
+.dl-folder-front {
+  width: var(--size);
+  height: var(--size);
+  transform-origin: 50% 100%;
+  filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.1));
+  transform: translate(-50%, -50%) scaleY(calc(var(--scale-folder) * var(--scale-folder)));
+}
