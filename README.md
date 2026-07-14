@@ -1,6 +1,6 @@
 # OCI Enterprise AI
 
-An interactive, scroll-driven presentation on Oracle Cloud Infrastructure's enterprise AI and agent platform. A data-driven landing page with cinematic scroll effects and bilingual (EN/ES) content.
+An interactive, scroll-driven presentation on Oracle Cloud Infrastructure's Enterprise AI platform — covering the **Responses API** and **Hosted Deployments** for building and running enterprise AI agents. A data-driven landing page with cinematic scroll effects and bilingual (EN/ES) content.
 
 ## Stack
 
