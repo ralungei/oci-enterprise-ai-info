@@ -8,20 +8,54 @@ export default function CustomCursor() {
   const mousePos = useRef({ x: -100, y: -100 });
   const ringPos = useRef({ x: -100, y: -100 });
   const visible = useRef(false);
+  const isMoving = useRef(false);
+  const idleTimer = useRef<number>(0);
+  const rafId = useRef(0);
 
   useEffect(() => {
     const dot = dotRef.current;
     const ring = ringRef.current;
     if (!dot || !ring) return;
 
+    // Only check for touch devices once
+    const isTouch = window.matchMedia("(hover: none)").matches;
+    if (isTouch) return;
+
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+    const animate = () => {
+      ringPos.current.x = lerp(ringPos.current.x, mousePos.current.x, 0.15);
+      ringPos.current.y = lerp(ringPos.current.y, mousePos.current.y, 0.15);
+      ring.style.transform = `translate(${ringPos.current.x}px, ${ringPos.current.y}px)`;
+
+      // Stop RAF when ring has caught up (close enough)
+      const dx = ringPos.current.x - mousePos.current.x;
+      const dy = ringPos.current.y - mousePos.current.y;
+      if (dx * dx + dy * dy > 0.5 || isMoving.current) {
+        rafId.current = requestAnimationFrame(animate);
+      }
+    };
+
+    const startAnimation = () => {
+      cancelAnimationFrame(rafId.current);
+      rafId.current = requestAnimationFrame(animate);
+    };
+
     const onMouseMove = (e: MouseEvent) => {
-      mousePos.current = { x: e.clientX, y: e.clientY };
+      mousePos.current.x = e.clientX;
+      mousePos.current.y = e.clientY;
       dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+
       if (!visible.current) {
         visible.current = true;
         dot.style.opacity = "1";
         ring.style.opacity = "1";
       }
+
+      isMoving.current = true;
+      startAnimation();
+      window.clearTimeout(idleTimer.current);
+      idleTimer.current = window.setTimeout(() => { isMoving.current = false; }, 100);
     };
 
     const onMouseLeave = () => {
@@ -42,18 +76,6 @@ export default function CustomCursor() {
       ring.style.borderColor = "rgba(199, 70, 52, 0.3)";
     };
 
-    // Smooth follow for ring
-    let raf: number;
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-    const animate = () => {
-      ringPos.current.x = lerp(ringPos.current.x, mousePos.current.x, 0.15);
-      ringPos.current.y = lerp(ringPos.current.y, mousePos.current.y, 0.15);
-      ring.style.transform = `translate(${ringPos.current.x}px, ${ringPos.current.y}px)`;
-      raf = requestAnimationFrame(animate);
-    };
-    raf = requestAnimationFrame(animate);
-
-    // Check if hovering on interactive elements
     const onMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const interactive = target.closest("a, button, [role=button], input, select, textarea, [data-glow-card]");
@@ -72,14 +94,15 @@ export default function CustomCursor() {
       }
     };
 
-    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mousemove", onMouseMove, { passive: true });
     document.addEventListener("mouseleave", onMouseLeave);
     document.addEventListener("mousedown", onMouseDown);
     document.addEventListener("mouseup", onMouseUp);
-    document.addEventListener("mouseover", onMouseOver);
+    document.addEventListener("mouseover", onMouseOver, { passive: true });
 
     return () => {
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(rafId.current);
+      window.clearTimeout(idleTimer.current);
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseleave", onMouseLeave);
       document.removeEventListener("mousedown", onMouseDown);
@@ -90,7 +113,6 @@ export default function CustomCursor() {
 
   return (
     <>
-      {/* Inner dot */}
       <div
         ref={dotRef}
         className="custom-cursor-dot"
@@ -111,7 +133,6 @@ export default function CustomCursor() {
           willChange: "transform",
         }}
       />
-      {/* Outer ring */}
       <div
         ref={ringRef}
         className="custom-cursor-ring"

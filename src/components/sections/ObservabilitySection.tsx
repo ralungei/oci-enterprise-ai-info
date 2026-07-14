@@ -42,7 +42,7 @@ export default function ObservabilitySection({ content }: { content: Observabili
               <span className="gradient-text">your agents do.</span>
             </h2>
             <p className="text-xl text-medium-gray mt-6 leading-relaxed">
-              Think of it as CCTV for your AI. Every tool call, every decision, every response — logged, traced, and available for review.
+              Think of it as CCTV for your AI. Every tool call, every decision, every response. Logged, traced, and available for review.
             </p>
           </div>
         </Reveal>
@@ -109,7 +109,7 @@ export default function ObservabilitySection({ content }: { content: Observabili
             <div className="inline-flex items-center gap-3 bg-oracle-red/5 rounded-full px-8 py-4 border border-oracle-red/10">
               <Icon icon="solar:info-circle-bold-duotone" className="text-oracle-red" width={20} height={20} />
               <p className="text-base font-bold text-dark-text">
-                Every API call is traced. Every tool invocation is logged. Built in from day one — not optional.
+                Every API call is traced. Every tool invocation is logged. Built in from day one, not optional.
               </p>
             </div>
           </div>

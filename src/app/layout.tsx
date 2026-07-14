@@ -8,7 +8,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OCI Enterprise AI — One Platform. Any Model. Any Agent.",
+  title: "OCI Enterprise AI | One Platform. Any Model. Any Agent.",
   description:
     "Build production-ready AI agents with enterprise governance. Access 15+ state-of-the-art models, 8 built-in tools, and deploy across 9 global regions.",
 };

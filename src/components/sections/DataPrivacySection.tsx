@@ -143,7 +143,7 @@ export default function DataPrivacySection({ content }: { content: DataPrivacyCo
                 </p>
               </div>
               <p className="text-lg text-medium-gray mt-6 leading-relaxed">
-                This is the #1 question we get from enterprises. Here&apos;s exactly how we handle your data — in plain terms.
+                This is the #1 question we get from enterprises. Here&apos;s exactly how we handle your data, in plain terms.
               </p>
               <p className="text-sm text-medium-gray/60 mt-6 hidden lg:block">
                 Scroll to explore each principle &darr;

@@ -38,11 +38,11 @@ export default function ParticleImage({
   const particlesRef = useRef<Particle[]>([]);
   const mouseRef = useRef({ x: -9999, y: -9999, isOver: false });
   const animFrameRef = useRef<number>(0);
+  const isVisibleRef = useRef(false);
   const [loaded, setLoaded] = useState(false);
 
   const initParticles = useCallback(
     (ctx: CanvasRenderingContext2D, img: HTMLImageElement) => {
-      // Draw image to offscreen canvas to sample pixels
       const offscreen = document.createElement("canvas");
       offscreen.width = width;
       offscreen.height = height;
@@ -53,8 +53,11 @@ export default function ParticleImage({
       const pixels = imageData.data;
       const particles: Particle[] = [];
 
-      for (let y = 0; y < height; y += particleGap) {
-        for (let x = 0; x < width; x += particleGap) {
+      // Use larger gap for fewer particles
+      const gap = Math.max(particleGap, 5);
+
+      for (let y = 0; y < height; y += gap) {
+        for (let x = 0; x < width; x += gap) {
           const i = (y * width + x) * 4;
           const a = pixels[i + 3];
           if (a < 128) continue;
@@ -62,8 +65,6 @@ export default function ParticleImage({
           const r = pixels[i];
           const g = pixels[i + 1];
           const b = pixels[i + 2];
-
-          // Skip very dark or transparent pixels
           if (r + g + b < 30) continue;
 
           const angle = Math.random() * Math.PI * 2;
@@ -90,6 +91,21 @@ export default function ParticleImage({
     [width, height, particleGap, particleSize, scatterRadius]
   );
 
+  // IntersectionObserver to pause when off-screen
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      },
+      { rootMargin: "100px" }
+    );
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -115,13 +131,19 @@ export default function ParticleImage({
     const ctx = canvas.getContext("2d")!;
 
     const animate = () => {
+      animFrameRef.current = requestAnimationFrame(animate);
+
+      // Skip rendering when off-screen
+      if (!isVisibleRef.current) return;
+
       ctx.clearRect(0, 0, width, height);
       const particles = particlesRef.current;
       const mouse = mouseRef.current;
 
-      for (const p of particles) {
-        const targetX = mouse.isOver ? p.originX : p.originX + (Math.random() - 0.5) * 0.5 + (p.x > p.originX ? 1 : -1) * 0.1;
-        const targetY = mouse.isOver ? p.originY : p.originY + (Math.random() - 0.5) * 0.5 + (p.y > p.originY ? 1 : -1) * 0.1;
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        const targetX = mouse.isOver ? p.originX : p.originX + (p.x > p.originX ? 0.1 : -0.1);
+        const targetY = mouse.isOver ? p.originY : p.originY + (p.y > p.originY ? 0.1 : -0.1);
 
         const ease = mouse.isOver ? 0.08 : 0.02;
         p.vx += (targetX - p.x) * ease;
@@ -131,27 +153,24 @@ export default function ParticleImage({
         p.x += p.vx;
         p.y += p.vy;
 
-        // Distance from origin for color interpolation
+        // Simplified distance for color interpolation (skip sqrt)
         const dx = p.x - p.originX;
         const dy = p.y - p.originY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const maxDist = 80;
-        const t = Math.min(dist / maxDist, 1);
+        const distSq = dx * dx + dy * dy;
+        const maxDistSq = 6400; // 80 * 80
+        const t = Math.min(distSq / maxDistSq, 1);
 
-        // Interpolate between color and gray
         const gray = (p.r + p.g + p.b) / 3;
-        const r = Math.round(p.r * (1 - t) + gray * t);
-        const g = Math.round(p.g * (1 - t) + gray * t);
-        const b = Math.round(p.b * (1 - t) + gray * t);
+        const r = (p.r * (1 - t) + gray * t) | 0;
+        const g = (p.g * (1 - t) + gray * t) | 0;
+        const b = (p.b * (1 - t) + gray * t) | 0;
         const alpha = mouse.isOver ? 1 : 0.4 + (1 - t) * 0.6;
 
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
       }
-
-      animFrameRef.current = requestAnimationFrame(animate);
     };
 
     animate();

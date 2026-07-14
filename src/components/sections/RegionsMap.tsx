@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import type { RegionsContent } from "@/data/types";
+import { useLanguage } from "@/context/LanguageContext";
+import { t } from "@/data/ui-strings";
 
 function Reveal({
   children,
@@ -27,16 +29,17 @@ function Reveal({
 }
 
 export default function RegionsMap({ content }: { content: RegionsContent }) {
+  const { lang } = useLanguage();
   return (
-    <section className="py-32 md:py-40 bg-[#0a0a0f] text-white noise-overlay">
+    <section className="relative py-32 md:py-40 bg-dark-text text-white">
       <div className="max-w-6xl mx-auto px-6 relative z-10">
         <Reveal>
           <div className="accent-bar mb-6" />
           <p className="text-sm font-bold text-oracle-red uppercase tracking-[0.2em] mb-5">
-            Global Availability
+            {t("regions.label", lang)}
           </p>
           <h2 className="text-4xl md:text-6xl font-extrabold leading-[1.05] tracking-tight">
-            Available in <span className="bg-gradient-to-r from-[#e85d4a] to-[#C74634] bg-clip-text text-transparent">9 regions</span> worldwide.
+            {t("regions.title1", lang)} <span className="bg-gradient-to-r from-[#e85d4a] to-[#C74634] bg-clip-text text-transparent">{t("regions.title2", lang)}</span> {t("regions.title3", lang)}
           </h2>
         </Reveal>
 

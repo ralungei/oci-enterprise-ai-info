@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { ActiveSectionProvider, useActiveSection } from "@/context/ActiveSectionContext";
+import { LanguageProvider, useLanguage } from "@/context/LanguageContext";
 import SectionProgress from "@/components/presentation/SectionProgress";
 import Teleprompter from "@/components/presentation/Teleprompter";
 import SectionWrapper from "@/components/presentation/SectionWrapper";
 import Preloader from "@/components/effects/Preloader";
 import CustomCursor from "@/components/effects/CustomCursor";
+import LanguageSelector from "@/components/LanguageSelector";
 import { slides } from "@/data/slides";
+import { slidesEs } from "@/data/slides-es";
+import type { DataPrivacyContent, ObservabilityContent, SecurityAuthContent } from "@/data/types";
 
 /* ── Lazy-load every section (code-split per section) ── */
 const HeroSection = dynamic(() => import("@/components/sections/HeroSection"), { ssr: false });
@@ -20,30 +24,46 @@ const AgentToolsGrid = dynamic(() => import("@/components/sections/AgentToolsGri
 const MemorySection = dynamic(() => import("@/components/sections/MemorySection"), { ssr: false });
 const FrameworksSection = dynamic(() => import("@/components/sections/FrameworksSection"), { ssr: false });
 const DeploymentSection = dynamic(() => import("@/components/sections/DeploymentSection"), { ssr: false });
-const DataPrivacySection = dynamic(() => import("@/components/sections/DataPrivacySection"), { ssr: false });
-const ObservabilitySection = dynamic(() => import("@/components/sections/ObservabilitySection"), { ssr: false });
-const SecurityAuthSection = dynamic(() => import("@/components/sections/SecurityAuthSection"), { ssr: false });
-const UseCasesSection = dynamic(() => import("@/components/sections/UseCasesSection"), { ssr: false });
+const GovernanceSection = dynamic(() => import("@/components/sections/GovernanceSection"), { ssr: false });
 const RegionsMap = dynamic(() => import("@/components/sections/RegionsMap"), { ssr: false });
+const DemoSection = dynamic(() => import("@/components/sections/DemoSection"), { ssr: false });
+const ArchitectureSection = dynamic(() => import("@/components/sections/ArchitectureSection"), { ssr: false });
 const GetStartedSection = dynamic(() => import("@/components/sections/GetStartedSection"), { ssr: false });
+const PillarDivider = dynamic(() => import("@/components/sections/PillarDivider"), { ssr: false });
 
 const sectionComponents: Record<string, React.ComponentType<{ content: never }>> = {
   hero: HeroSection as React.ComponentType<{ content: never }>,
   "what-is-agent": AgentIntroSection as React.ComponentType<{ content: never }>,
   challenge: ProblemSection as React.ComponentType<{ content: never }>,
   platform: PlatformPillars as React.ComponentType<{ content: never }>,
-  models: ModelsShowcase as React.ComponentType<{ content: never }>,
   tools: AgentToolsGrid as React.ComponentType<{ content: never }>,
   memory: MemorySection as React.ComponentType<{ content: never }>,
+  models: ModelsShowcase as React.ComponentType<{ content: never }>,
   build: FrameworksSection as React.ComponentType<{ content: never }>,
   deploy: DeploymentSection as React.ComponentType<{ content: never }>,
-  "data-privacy": DataPrivacySection as React.ComponentType<{ content: never }>,
-  observability: ObservabilitySection as React.ComponentType<{ content: never }>,
-  "security-auth": SecurityAuthSection as React.ComponentType<{ content: never }>,
-  "use-cases": UseCasesSection as React.ComponentType<{ content: never }>,
   regions: RegionsMap as React.ComponentType<{ content: never }>,
   "get-started": GetStartedSection as React.ComponentType<{ content: never }>,
 };
+
+/* ── Render order (decoupled from slides.ts data order) ── */
+const sectionOrder = [
+  "hero",
+  "what-is-agent",
+  // "challenge", // hidden — kept for future use
+  "platform",
+  "pillar-1",    // → Managed AI API
+  "tools",
+  "memory",
+  "models",
+  "pillar-2",    // → Hosted Deployments
+  "build",
+  "deploy",
+  "governance",
+  "architecture",
+  "regions",
+  "demo",
+  "get-started",
+];
 
 function KeyboardHandler() {
   const { toggleTeleprompter } = useActiveSection();
@@ -65,6 +85,14 @@ function KeyboardHandler() {
 
 function MainContent() {
   const { teleprompterVisible } = useActiveSection();
+  const { lang } = useLanguage();
+
+  const currentSlides = lang === "es" ? slidesEs : slides;
+
+  const slideMap = useMemo(
+    () => Object.fromEntries(currentSlides.map((s) => [s.id, s])),
+    [currentSlides]
+  );
 
   return (
     <main
@@ -72,50 +100,73 @@ function MainContent() {
         teleprompterVisible ? "md:mr-[380px]" : ""
       }`}
     >
-      {slides.map((slide) => {
-        const Component = sectionComponents[slide.id];
-        if (!Component) return null;
+      {sectionOrder.map((id) => {
+        /* Pillar dividers */
+        if (id === "pillar-1") {
+          return <PillarDivider key="pillar-1" pillar={1} />;
+        }
+        if (id === "pillar-2") {
+          return <PillarDivider key="pillar-2" pillar={2} />;
+        }
+
+        /* Standalone sections (no data) */
+        if (id === "demo") {
+          return (
+            <SectionWrapper key="demo" id="demo">
+              <DemoSection />
+            </SectionWrapper>
+          );
+        }
+        if (id === "architecture") {
+          return (
+            <SectionWrapper key="architecture" id="architecture">
+              <ArchitectureSection />
+            </SectionWrapper>
+          );
+        }
+
+        /* Governance: merged from 3 data sections */
+        if (id === "governance") {
+          const priv = slideMap["data-privacy"];
+          const obs = slideMap["observability"];
+          const sec = slideMap["security-auth"];
+          if (!priv || !obs || !sec) return null;
+          return (
+            <SectionWrapper key="governance" id="governance">
+              <GovernanceSection
+                privacy={priv.content as DataPrivacyContent}
+                observability={obs.content as ObservabilityContent}
+                security={sec.content as SecurityAuthContent}
+              />
+            </SectionWrapper>
+          );
+        }
+
+        const slide = slideMap[id];
+        const Component = sectionComponents[id];
+        if (!slide || !Component) return null;
         return (
           <SectionWrapper key={slide.id} id={slide.id}>
             <Component content={slide.content as never} />
           </SectionWrapper>
         );
       })}
-
-      {/* Footer */}
-      <footer className="bg-[#0a0a0f] border-t border-white/[0.06] py-12">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-oracle-red flex items-center justify-center">
-              <span className="text-white font-bold text-sm">O</span>
-            </div>
-            <span className="text-white/30 text-base">
-              OCI Enterprise AI &middot; Oracle Cloud Infrastructure
-            </span>
-          </div>
-          <div className="flex items-center gap-8">
-            {["Documentation", "API Reference", "Support"].map((link) => (
-              <a key={link} href="#" className="text-sm text-white/30 hover:text-white/60 transition-colors font-medium">
-                {link}
-              </a>
-            ))}
-          </div>
-          <span className="text-sm text-white/20">&copy; 2026 Oracle</span>
-        </div>
-      </footer>
     </main>
   );
 }
 
 export default function Home() {
   return (
-    <ActiveSectionProvider>
-      <Preloader />
-      <CustomCursor />
-      <KeyboardHandler />
-      <SectionProgress />
-      <Teleprompter />
-      <MainContent />
-    </ActiveSectionProvider>
+    <LanguageProvider>
+      <ActiveSectionProvider>
+        <Preloader />
+        <CustomCursor />
+        <LanguageSelector />
+        <KeyboardHandler />
+        <SectionProgress />
+        <Teleprompter />
+        <MainContent />
+      </ActiveSectionProvider>
+    </LanguageProvider>
   );
 }

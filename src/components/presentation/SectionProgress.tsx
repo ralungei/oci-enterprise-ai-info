@@ -1,28 +1,50 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useMemo } from "react";
 import { useActiveSection } from "@/context/ActiveSectionContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { slides } from "@/data/slides";
+import { slidesEs } from "@/data/slides-es";
+
+const sectionIds = [
+  "hero", "what-is-agent", "challenge", "platform", "tools", "memory",
+  "models", "build", "deploy", "governance", "architecture", "regions",
+  "demo", "get-started",
+];
 
 export default function SectionProgress() {
   const { activeSectionId } = useActiveSection();
-  const currentIndex = slides.findIndex((s) => s.id === activeSectionId);
+  const { lang } = useLanguage();
+
+  const navItems = useMemo(() => {
+    const fallback: Record<string, Record<string, string>> = {
+      governance: { en: "Governance", es: "Gobernanza" },
+      architecture: { en: "Architecture", es: "Arquitectura" },
+      demo: { en: "Demo", es: "Demo" },
+    };
+    const currentSlides = lang === "es" ? slidesEs : slides;
+    const slideMap = Object.fromEntries(currentSlides.map((s) => [s.id, s]));
+    return sectionIds.map((id) => ({
+      id,
+      label: slideMap[id]?.sectionLabel ?? fallback[id]?.[lang] ?? id,
+    }));
+  }, [lang]);
+  const currentIndex = navItems.findIndex((n) => n.id === activeSectionId);
 
   return (
     <div className="fixed left-6 top-1/2 -translate-y-1/2 z-30 hidden xl:flex flex-col gap-5">
-      {slides.map((slide, i) => {
-        const isActive = slide.id === activeSectionId;
+      {navItems.map((item, i) => {
+        const isActive = item.id === activeSectionId;
         const isPast = i < currentIndex;
         return (
           <a
-            key={slide.id}
-            href={`#${slide.id}`}
+            key={item.id}
+            href={`#${item.id}`}
             className="group flex items-center gap-3"
           >
-            {/* Dot */}
-            <motion.div
-              className="rounded-full shrink-0"
-              animate={{
+            <div
+              className="rounded-full shrink-0 transition-all duration-300"
+              style={{
                 width: isActive ? 14 : 6,
                 height: isActive ? 14 : 6,
                 backgroundColor: isActive
@@ -34,28 +56,17 @@ export default function SectionProgress() {
                   ? "0 0 14px rgba(199, 70, 52, 0.5)"
                   : "none",
               }}
-              transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 25,
-              }}
             />
-            {/* Label — always visible */}
-            <motion.span
-              className="whitespace-nowrap leading-none"
-              animate={{
+            <span
+              className="whitespace-nowrap leading-none transition-all duration-300"
+              style={{
                 color: isActive ? "#C74634" : isPast ? "rgba(49, 45, 42, 0.45)" : "rgba(107, 107, 107, 0.4)",
                 fontSize: isActive ? "14px" : "11px",
                 fontWeight: isActive ? 700 : 500,
               }}
-              transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 25,
-              }}
             >
-              {slide.sectionLabel}
-            </motion.span>
+              {item.label}
+            </span>
           </a>
         );
       })}

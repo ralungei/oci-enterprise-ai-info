@@ -3,8 +3,8 @@
 import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
 import type { ModelsContent } from "@/data/types";
-import CursorGlow, { GlowCard } from "@/components/effects/CursorGlow";
-import VideoPlaceholder from "@/components/effects/VideoPlaceholder";
+import { useLanguage } from "@/context/LanguageContext";
+import { t } from "@/data/ui-strings";
 
 function Reveal({
   children,
@@ -38,61 +38,86 @@ function Reveal({
   );
 }
 
+const providerLogos: Record<string, { icon: string; color: string }> = {
+  OpenAI: { icon: "simple-icons:openai", color: "#000000" },
+  Google: { icon: "simple-icons:google", color: "#4285F4" },
+  xAI: { icon: "simple-icons:x", color: "#000000" },
+  Meta: { icon: "simple-icons:meta", color: "#0668E1" },
+  Cohere: { icon: "solar:stars-bold-duotone", color: "#39594D" },
+  BYOM: { icon: "solar:server-square-cloud-bold-duotone", color: "#C74634" },
+};
+
 export default function ModelsShowcase({ content }: { content: ModelsContent }) {
+  const { lang } = useLanguage();
   return (
     <section className="py-32 md:py-40 mesh-gradient-2">
       <div className="max-w-6xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-          <div>
-            <Reveal>
-              <div className="accent-bar mb-6" />
-              <p className="text-sm font-bold text-oracle-red uppercase tracking-[0.2em] mb-5">
-                Models
-              </p>
-              <h2 className="text-4xl md:text-6xl font-extrabold text-dark-text leading-[1.05] tracking-tight">
-                No lock-in.
-                <br />
-                <span className="gradient-text">Your choice.</span>
-              </h2>
-              <p className="text-medium-gray mt-6 text-xl leading-relaxed">
-                Pioneering agreements with all major providers.
-                Switch models with one line of code. Your data is never used to train models.
-              </p>
-            </Reveal>
+        <Reveal>
+          <div className="accent-bar mb-6" />
+          <p className="text-sm font-bold text-oracle-red uppercase tracking-[0.2em] mb-5">
+            {t("models.label", lang)}
+          </p>
+          <h2 className="text-4xl md:text-6xl font-extrabold text-dark-text leading-[1.05] tracking-tight">
+            {t("models.title1", lang)}
+            <br />
+            <span className="gradient-text">{t("models.title2", lang)}</span>
+          </h2>
+          <p className="text-medium-gray mt-6 text-xl leading-relaxed max-w-2xl">
+            {t("models.subtitle", lang)}
+          </p>
+        </Reveal>
 
-            <Reveal delay={0.2} className="mt-10">
-              <div className="code-block">
-                <div className="flex items-center gap-1.5 mb-4">
-                  <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-                  <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
-                  <div className="w-3 h-3 rounded-full bg-[#28c840]" />
-                  <span className="text-xs text-white/20 ml-2 font-mono">quickstart.py</span>
+        {/* Provider cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mt-16">
+          {content.providers.map((p, i) => {
+            const logo = providerLogos[p.provider];
+            return (
+              <Reveal key={p.provider} delay={i * 0.06}>
+                <div className="rounded-3xl bg-white border border-gray-100 p-8 hover:shadow-xl hover:border-oracle-red/20 transition-all group flex items-center gap-4">
+                  {logo && (
+                    <Icon
+                      icon={logo.icon}
+                      width={36}
+                      height={36}
+                      style={{ color: logo.color }}
+                      className="group-hover:scale-110 transition-transform shrink-0"
+                    />
+                  )}
+                  <h3 className="text-xl font-extrabold text-dark-text">
+                    {p.provider}
+                  </h3>
                 </div>
-                <pre><code>{content.codeExample}</code></pre>
-              </div>
-            </Reveal>
-          </div>
-
-          <CursorGlow className="grid grid-cols-2 gap-5" glowColor="rgba(199, 70, 52, 0.2)">
-            {content.providers.map((p, i) => (
-              <Reveal key={p.provider} delay={i * 0.08}>
-                <GlowCard className="rounded-2xl h-full">
-                  <div className="rounded-2xl bg-white p-6 border border-gray-100 h-full">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="font-bold text-dark-text text-lg">{p.provider}</span>
-                      <span className="text-xs font-bold text-oracle-red bg-oracle-red/10 px-3 py-1 rounded-full">
-                        {p.badge}
-                      </span>
-                    </div>
-                    <p className="text-sm text-medium-gray leading-relaxed">{p.models}</p>
-                  </div>
-                </GlowCard>
               </Reveal>
-            ))}
-          </CursorGlow>
+            );
+          })}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-24">
+        {/* Key Messages */}
+        {content.keyMessages && content.keyMessages.length > 0 && (
+          <div className="mt-24">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {content.keyMessages.map((msg, i) => (
+                <Reveal key={msg.title} delay={i * 0.1}>
+                  <div className="p-8 h-full">
+                    <div className="w-12 h-12 rounded-2xl bg-oracle-red/10 flex items-center justify-center mb-5">
+                      <Icon icon={msg.icon} className="text-oracle-red" width={24} height={24} />
+                    </div>
+                    <h4 className="text-lg font-extrabold text-dark-text">{msg.title}</h4>
+                    <p className="text-base text-medium-gray mt-2 leading-relaxed">{msg.desc}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Deployment Modes */}
+        <Reveal>
+          <h3 className="text-2xl font-extrabold text-dark-text text-center mt-24 mb-12">
+            {t("models.howToConsume", lang)}
+          </h3>
+        </Reveal>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {content.deploymentModes.map((mode, i) => (
             <Reveal key={mode.title} direction={i === 0 ? "left" : "right"}>
               <div
@@ -122,39 +147,6 @@ export default function ModelsShowcase({ content }: { content: ModelsContent }) 
             </Reveal>
           ))}
         </div>
-
-        {/* Key Messages */}
-        {content.keyMessages && content.keyMessages.length > 0 && (
-          <div className="mt-24 space-y-8">
-            <Reveal>
-              <h3 className="text-2xl font-extrabold text-dark-text text-center mb-12">
-                What this means for you
-              </h3>
-            </Reveal>
-            {content.keyMessages.map((msg, i) => (
-              <Reveal key={msg.title} delay={i * 0.1}>
-                <div className="flex items-start gap-6 bg-white rounded-2xl p-8 border border-gray-100 hover:shadow-lg transition-shadow">
-                  <div className="w-14 h-14 rounded-2xl bg-oracle-red/10 flex items-center justify-center shrink-0">
-                    <Icon icon={msg.icon} className="text-oracle-red" width={28} height={28} />
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-extrabold text-dark-text">{msg.title}</h4>
-                    <p className="text-base text-medium-gray mt-2 leading-relaxed">{msg.desc}</p>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        )}
-
-        {/* Demo video */}
-        <Reveal className="mt-20 max-w-3xl mx-auto">
-          <VideoPlaceholder
-            videoUrl="https://www.w3schools.com/html/mov_bbb.mp4"
-            replacementLabel="Model switching & Responses API demo"
-            posterText="Switch models with one line of code"
-          />
-        </Reveal>
       </div>
     </section>
   );

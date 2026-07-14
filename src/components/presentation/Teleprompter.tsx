@@ -1,17 +1,22 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useActiveSection } from "@/context/ActiveSectionContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { t } from "@/data/ui-strings";
 import { slides } from "@/data/slides";
+import { slidesEs } from "@/data/slides-es";
 
 export default function Teleprompter() {
   const { activeSectionId, teleprompterVisible } = useActiveSection();
+  const { lang } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef<HTMLDivElement>(null);
 
-  const currentIndex = slides.findIndex((s) => s.id === activeSectionId);
-  const total = slides.length;
+  const currentSlides = useMemo(() => (lang === "es" ? slidesEs : slides), [lang]);
+  const currentIndex = currentSlides.findIndex((s) => s.id === activeSectionId);
+  const total = currentSlides.length;
 
   useEffect(() => {
     if (activeRef.current && containerRef.current) {
@@ -37,7 +42,7 @@ export default function Teleprompter() {
             {/* Progress bar */}
             <div className="px-5 pt-16 pb-3">
               <div className="flex items-center justify-between text-xs text-white/40 mb-2">
-                <span className="font-semibold uppercase tracking-wider">Speaker Notes</span>
+                <span className="font-semibold uppercase tracking-wider">{t("teleprompter.title", lang)}</span>
                 <span>
                   {currentIndex + 1} / {total}
                 </span>
@@ -53,7 +58,7 @@ export default function Teleprompter() {
 
             {/* Notes container */}
             <div ref={containerRef} className="flex-1 overflow-y-auto px-5 pb-8 teleprompter-scroll">
-              {slides.map((slide) => {
+              {currentSlides.map((slide) => {
                 const isActive = slide.id === activeSectionId;
                 return (
                   <div
@@ -105,7 +110,7 @@ export default function Teleprompter() {
             </div>
             <div className="px-4 pb-2">
               <div className="flex items-center justify-between text-xs text-white/40">
-                <span className="font-semibold uppercase tracking-wider">Speaker Notes</span>
+                <span className="font-semibold uppercase tracking-wider">{t("teleprompter.title", lang)}</span>
                 <span>
                   {currentIndex + 1} / {total}
                 </span>
@@ -119,7 +124,7 @@ export default function Teleprompter() {
               </div>
             </div>
             <div className="flex-1 overflow-y-auto px-4 pb-4 teleprompter-scroll">
-              {slides
+              {currentSlides
                 .filter((s) => s.id === activeSectionId)
                 .map((slide) => (
                   <div key={slide.id}>

@@ -13,7 +13,10 @@ export type SectionType =
   | "security-auth"
   | "use-cases"
   | "regions"
-  | "get-started";
+  | "get-started"
+  | "governance"
+  | "demo"
+  | "architecture";
 
 export type SectionTheme = "dark" | "light" | "gray" | "mesh-1" | "mesh-2";
 

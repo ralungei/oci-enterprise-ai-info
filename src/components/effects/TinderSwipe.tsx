@@ -8,6 +8,8 @@ import {
   AnimatePresence,
   type PanInfo,
 } from "framer-motion";
+import { useLanguage } from "@/context/LanguageContext";
+import { t } from "@/data/ui-strings";
 
 export interface SwipeCard {
   id: number;
@@ -34,6 +36,7 @@ function Card({
   stackIndex: number;
   onSwipe: (direction: "left" | "right") => void;
 }) {
+  const { lang } = useLanguage();
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-300, 0, 300], [-18, 0, 18]);
   const leftOpacity = useTransform(x, [-150, 0], [1, 0]);
@@ -81,13 +84,13 @@ function Card({
               className="absolute top-6 right-6 text-green-500 font-extrabold text-2xl border-4 border-green-500 rounded-xl px-5 py-2 -rotate-12"
               style={{ opacity: rightOpacity }}
             >
-              AGENT
+              {t("swipe.agent", lang)}
             </motion.div>
             <motion.div
               className="absolute top-6 left-6 text-red-500 font-extrabold text-2xl border-4 border-red-500 rounded-xl px-5 py-2 rotate-12"
               style={{ opacity: leftOpacity }}
             >
-              NOPE
+              {t("swipe.nope", lang)}
             </motion.div>
           </>
         )}
@@ -100,7 +103,7 @@ function Card({
 
         <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-100">
           <span className="text-sm text-medium-gray font-medium">
-            Swipe right if agent, left if not
+            {t("swipe.hint", lang)}
           </span>
           <span className="text-xs text-medium-gray/50 font-mono">
             #{card.id + 1}
@@ -118,38 +121,39 @@ function ResultCard({
   card: SwipeCard;
   userSaidAgent: boolean;
 }) {
+  const { lang } = useLanguage();
   const isCorrect = userSaidAgent === card.isAgent;
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, scale: 0.8, x: 40 }}
+      animate={{ opacity: 1, scale: 1, x: 0 }}
       exit={{ opacity: 0, scale: 0.8 }}
-      className={`rounded-2xl p-6 border-2 ${
+      className={`rounded-2xl p-5 border-2 shrink-0 w-72 ${
         isCorrect
           ? "border-green-200 bg-green-50"
           : "border-red-200 bg-red-50"
       }`}
     >
-      <div className="flex items-center gap-3 mb-2">
+      <div className="flex items-center gap-2 mb-2">
         <span
-          className={`text-2xl font-extrabold ${
+          className={`text-lg font-extrabold ${
             isCorrect ? "text-green-600" : "text-red-600"
           }`}
         >
-          {isCorrect ? "Correct!" : "Not quite!"}
+          {isCorrect ? t("swipe.correct", lang) : t("swipe.notQuite", lang)}
         </span>
         <span
-          className={`text-sm font-bold px-3 py-1 rounded-full ${
+          className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
             card.isAgent
               ? "bg-oracle-red text-white"
               : "bg-gray-200 text-dark-text"
           }`}
         >
-          {card.isAgent ? "Agent" : "Not an Agent"}
+          {card.isAgent ? t("swipe.isAgent", lang) : t("swipe.notAgent", lang)}
         </span>
       </div>
-      <p className="text-sm text-medium-gray leading-relaxed">
+      <p className="text-sm text-medium-gray leading-relaxed line-clamp-3">
         {card.explanation}
       </p>
     </motion.div>
@@ -157,6 +161,7 @@ function ResultCard({
 }
 
 export default function TinderSwipe({ cards, className = "" }: TinderSwipeProps) {
+  const { lang } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState<
     { card: SwipeCard; userSaidAgent: boolean }[]
@@ -204,17 +209,19 @@ export default function TinderSwipe({ cards, className = "" }: TinderSwipeProps)
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="absolute inset-0 flex flex-col items-center justify-center"
+            className="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
           >
-            <div className="text-6xl font-extrabold text-oracle-red">
-              {correctCount}/{cards.length}
-            </div>
-            <p className="text-xl font-bold text-dark-text mt-3">
-              {correctCount === cards.length
-                ? "Perfect score!"
-                : correctCount >= 3
-                ? "Well done!"
-                : "Keep learning!"}
+            <p className="text-2xl md:text-3xl font-extrabold text-dark-text">
+              {t("swipe.hardToTell", lang)}
+            </p>
+            <p className="text-base text-medium-gray mt-4 leading-relaxed max-w-md">
+              {t("swipe.trend", lang).split(/(<[^>]+>)/).map((seg, i) =>
+                seg.startsWith("<") && seg.endsWith(">") ? (
+                  <span key={i} className="text-oracle-red font-bold">{seg.slice(1, -1)}</span>
+                ) : (
+                  <span key={i}>{seg}</span>
+                )
+              )}
             </p>
             <button
               onClick={() => {
@@ -223,7 +230,7 @@ export default function TinderSwipe({ cards, className = "" }: TinderSwipeProps)
               }}
               className="mt-6 text-sm font-bold text-oracle-red hover:underline"
             >
-              Try again
+              {t("swipe.tryAgain", lang)}
             </button>
           </motion.div>
         )}
@@ -259,18 +266,20 @@ export default function TinderSwipe({ cards, className = "" }: TinderSwipeProps)
         </div>
       )}
 
-      {/* Results feed */}
+      {/* Results carousel */}
       {results.length > 0 && (
-        <div className="mt-8 space-y-3 max-w-lg mx-auto">
-          <AnimatePresence>
-            {results.map((r, i) => (
-              <ResultCard
-                key={i}
-                card={r.card}
-                userSaidAgent={r.userSaidAgent}
-              />
-            ))}
-          </AnimatePresence>
+        <div className="mt-8 overflow-x-auto hide-scrollbar">
+          <div className="flex gap-4 px-1 pb-2" style={{ minWidth: "min-content" }}>
+            <AnimatePresence>
+              {results.map((r, i) => (
+                <ResultCard
+                  key={i}
+                  card={r.card}
+                  userSaidAgent={r.userSaidAgent}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
         </div>
       )}
     </div>

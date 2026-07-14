@@ -43,7 +43,9 @@ const methodAccents: Record<string, string> = {
 
 export default function SecurityAuthSection({ content }: { content: SecurityAuthContent }) {
   return (
-    <section className="py-32 md:py-40 bg-[#0a0a0f] text-white noise-overlay">
+    <section className="relative py-32 md:py-40 bg-dark-text text-white">
+      <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-white to-transparent pointer-events-none z-20" />
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />
       <div className="max-w-6xl mx-auto px-6 relative z-10">
         <Reveal>
           <div className="accent-bar mb-6" />

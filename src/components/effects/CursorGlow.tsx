@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useEffect } from "react";
 
 interface CursorGlowProps {
   children: React.ReactNode;
@@ -14,16 +14,23 @@ export default function CursorGlow({
   glowColor = "rgba(199, 70, 52, 0.4)",
 }: CursorGlowProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLElement[]>([]);
+
+  // Cache card references after mount and on DOM changes
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    cardsRef.current = Array.from(el.querySelectorAll<HTMLElement>("[data-glow-card]"));
+  }, [children]);
 
   const handlePointerMove = useCallback(
     (ev: React.PointerEvent) => {
-      const cards = containerRef.current?.querySelectorAll<HTMLElement>("[data-glow-card]");
-      if (!cards) return;
-      cards.forEach((card) => {
-        const rect = card.getBoundingClientRect();
-        card.style.setProperty("--glow-x", String(ev.clientX - rect.left));
-        card.style.setProperty("--glow-y", String(ev.clientY - rect.top));
-      });
+      const cards = cardsRef.current;
+      for (let i = 0; i < cards.length; i++) {
+        const rect = cards[i].getBoundingClientRect();
+        cards[i].style.setProperty("--glow-x", String(ev.clientX - rect.left));
+        cards[i].style.setProperty("--glow-y", String(ev.clientY - rect.top));
+      }
     },
     []
   );

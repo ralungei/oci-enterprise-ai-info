@@ -19,14 +19,14 @@ export default function VideoCursor({
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cursorVideoRef = useRef<HTMLVideoElement>(null);
+  const cursorDivRef = useRef<HTMLDivElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
   const rafRef = useRef<number>(0);
   const targetRef = useRef({ x: 0, y: 0 });
   const currentRef = useRef({ x: 0, y: 0 });
 
-  // Smooth cursor follow with lerp
+  // Smooth cursor follow with direct DOM manipulation (no setState)
   useEffect(() => {
     if (!isHovering) return;
 
@@ -37,10 +37,11 @@ export default function VideoCursor({
       currentRef.current.y +=
         (targetRef.current.y - currentRef.current.y) * lerpFactor;
 
-      setCursorPos({
-        x: currentRef.current.x,
-        y: currentRef.current.y,
-      });
+      const el = cursorDivRef.current;
+      if (el) {
+        el.style.left = `${currentRef.current.x - 50}px`;
+        el.style.top = `${currentRef.current.y - 50}px`;
+      }
 
       rafRef.current = requestAnimationFrame(animate);
     };
@@ -98,11 +99,9 @@ export default function VideoCursor({
             className="absolute inset-0 z-10"
             onClick={handleClick}
           >
-            {/* Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f]" />
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,rgba(199,70,52,0.3),transparent_70%)]" />
 
-            {/* Center content (visible when not hovering) */}
             <div className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 ${isHovering ? "opacity-30" : "opacity-100"}`}>
               <div className="w-16 h-16 rounded-full bg-oracle-red/20 flex items-center justify-center border border-oracle-red/30">
                 <svg className="w-7 h-7 text-oracle-red ml-0.5" fill="currentColor" viewBox="0 0 24 24">
@@ -117,7 +116,6 @@ export default function VideoCursor({
               </p>
             </div>
 
-            {/* Scan lines */}
             <div
               className="absolute inset-0 pointer-events-none opacity-[0.03]"
               style={{
@@ -146,19 +144,12 @@ export default function VideoCursor({
         )}
       </AnimatePresence>
 
-      {/* Floating video cursor */}
+      {/* Floating video cursor — rendered via ref, no state-driven re-renders */}
       {isHovering && !isPlaying && (
-        <motion.div
+        <div
+          ref={cursorDivRef}
           className="absolute z-20 pointer-events-none"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0, opacity: 0 }}
-          style={{
-            left: cursorPos.x - 50,
-            top: cursorPos.y - 50,
-            width: 100,
-            height: 100,
-          }}
+          style={{ width: 100, height: 100 }}
         >
           <div className="w-full h-full rounded-full overflow-hidden border-2 border-oracle-red/60 shadow-2xl shadow-oracle-red/20 relative">
             <video
@@ -168,22 +159,20 @@ export default function VideoCursor({
               muted
               playsInline
               loop
-              preload="auto"
+              preload="none"
             />
-            {/* Play icon overlay */}
             <div className="absolute inset-0 flex items-center justify-center bg-black/20">
               <svg className="w-8 h-8 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
             </div>
           </div>
-          {/* Label */}
           <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
             <span className="text-xs font-bold text-white bg-oracle-red/80 px-3 py-1 rounded-full backdrop-blur-sm">
               Click to play
             </span>
           </div>
-        </motion.div>
+        </div>
       )}
     </div>
   );

@@ -3,7 +3,8 @@
 import { motion } from "framer-motion";
 import type { ChallengeContent } from "@/data/types";
 import OdometerNumber from "@/components/effects/OdometerNumber";
-import BlindsReveal from "@/components/effects/BlindsReveal";
+import { useLanguage } from "@/context/LanguageContext";
+import { t } from "@/data/ui-strings";
 
 function Reveal({
   children,
@@ -38,13 +39,14 @@ function Reveal({
 }
 
 export default function ProblemSection({ content }: { content: ChallengeContent }) {
+  const { lang } = useLanguage();
   return (
     <section className="py-32 md:py-40 mesh-gradient-1">
       <div className="max-w-6xl mx-auto px-6">
         <Reveal>
           <div className="accent-bar mb-6" />
           <p className="text-sm font-bold text-oracle-red uppercase tracking-[0.2em] mb-5">
-            The Challenge
+            {t("challenge.label", lang)}
           </p>
         </Reveal>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
@@ -58,25 +60,23 @@ export default function ProblemSection({ content }: { content: ChallengeContent 
             </p>
           </Reveal>
 
-          {/* Stats with BlindsReveal + OdometerNumber */}
-          <BlindsReveal cols={6} rows={4}>
-            <div className="grid grid-cols-2 gap-5">
-              {content.stats.map((stat) => (
-                <div
-                  key={stat.num}
-                  className="glow-card rounded-2xl bg-white p-7 border border-gray-100"
-                >
-                  <OdometerNumber
-                    value={stat.num}
-                    className="text-3xl md:text-4xl font-extrabold text-oracle-red tracking-tight"
-                  />
-                  <p className="text-sm text-medium-gray mt-3 leading-relaxed">
-                    {stat.text}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </BlindsReveal>
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-5">
+            {content.stats.map((stat) => (
+              <div
+                key={stat.num}
+                className="glow-card rounded-2xl bg-white p-7 border border-gray-100"
+              >
+                <OdometerNumber
+                  value={stat.num}
+                  className="text-3xl md:text-4xl font-extrabold text-oracle-red tracking-tight"
+                />
+                <p className="text-sm text-medium-gray mt-3 leading-relaxed">
+                  {stat.text}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
 
         <Reveal className="mt-28">

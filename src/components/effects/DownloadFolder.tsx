@@ -7,6 +7,7 @@ import "./download-folder.css";
 export default function DownloadFolder({ className = "" }: { className?: string }) {
   const downloadRef = useRef<HTMLDivElement>(null);
   const folderFrontRef = useRef<SVGSVGElement>(null);
+  const isVisibleRef = useRef(false);
 
   const handleClick = useCallback(() => {
     const download = downloadRef.current;
@@ -39,11 +40,31 @@ export default function DownloadFolder({ className = "" }: { className?: string 
     gsap.to(download, { "--scale-folder": 1, ease: "elastic", ...timespan(4, 5) } as gsap.TweenVars);
   }, []);
 
+  // Only run interval when visible
   useEffect(() => {
-    const timer = setTimeout(handleClick, 500);
-    const interval = setInterval(handleClick, 4000);
+    const el = downloadRef.current;
+    if (!el) return;
+
+    let interval: ReturnType<typeof setInterval>;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+        if (entry.isIntersecting) {
+          handleClick();
+          interval = setInterval(() => {
+            if (isVisibleRef.current) handleClick();
+          }, 8000);
+        } else {
+          clearInterval(interval);
+        }
+      },
+      { rootMargin: "50px" }
+    );
+
+    observer.observe(el);
     return () => {
-      clearTimeout(timer);
+      observer.disconnect();
       clearInterval(interval);
     };
   }, [handleClick]);

@@ -1,6 +1,8 @@
 "use client";
 
 import "./isometric-layers.css";
+import { useLanguage } from "@/context/LanguageContext";
+import { t } from "@/data/ui-strings";
 
 interface LayerConfig {
   text: string;
@@ -52,6 +54,7 @@ function Layer({ text, gradient, size, offset = [0, 0, 0], index }: LayerConfig)
 }
 
 export default function IsometricLayers() {
+  const { lang } = useLanguage();
   return (
     <svg className="iso-layers" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
       {/*
@@ -60,16 +63,11 @@ export default function IsometricLayers() {
         Higher Y offset = lower on screen
       */}
 
-      {/* 1. OCI Infrastructure — bottom of stack, painted first (behind) */}
-      <Layer index={0} text="OCI Infra" gradient={["#1a1a2e", "#312D2A"]} offset={[0, 65, 0]} size={100} />
-
-      {/* 2. Platform — middle of stack */}
-      <Layer index={1} text="Platform" gradient={["#312D2A", "#6B6B6B"]} offset={[0, 38, 0]} size={100} />
-
-      {/* 3. Capabilities — top of stack, painted last (in front) */}
-      <Layer index={2} text="Tools"      gradient={["#C74634", "#e85d4a"]} offset={[0, 10, 0]}  size={48} />
-      <Layer index={3} text="Memory"     gradient={["#C74634", "#e85d4a"]} offset={[52, 10, 0]} size={48} />
-      <Layer index={4} text="Models"     gradient={["#C74634", "#e85d4a"]} offset={[0, 20, 0]}  size={48} />
+      <Layer index={0} text={t("iso.ociInfra", lang)} gradient={["#1a1a2e", "#312D2A"]} offset={[0, 65, 0]} size={100} />
+      <Layer index={1} text={t("iso.platform", lang)} gradient={["#312D2A", "#6B6B6B"]} offset={[0, 38, 0]} size={100} />
+      <Layer index={2} text={t("iso.tools", lang)} gradient={["#C74634", "#e85d4a"]} offset={[0, 10, 0]}  size={48} />
+      <Layer index={3} text={t("iso.memory", lang)} gradient={["#C74634", "#e85d4a"]} offset={[52, 10, 0]} size={48} />
+      <Layer index={4} text={t("iso.models", lang)} gradient={["#C74634", "#e85d4a"]} offset={[0, 20, 0]}  size={48} />
       <Layer index={5} text="Frameworks" gradient={["#C74634", "#e85d4a"]} offset={[52, 20, 0]} size={48} />
     </svg>
   );
