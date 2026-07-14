@@ -2,6 +2,8 @@
 
 An interactive, scroll-driven presentation on Oracle Cloud Infrastructure's Enterprise AI platform — covering the **Responses API** and **Hosted Deployments** for building and running enterprise AI agents. A data-driven landing page with cinematic scroll effects and bilingual (EN/ES) content.
 
+![OCI Enterprise AI](public/screenshots/readme-hero.png)
+
 ## Stack
 
 - **Next.js** (App Router) + **React**
