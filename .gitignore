@@ -46,3 +46,6 @@ AGENTS.md
 skills-lock.json
 .claude/
 .agents/
+
+# internal speaker script
+SPEAKER_NOTES.md
